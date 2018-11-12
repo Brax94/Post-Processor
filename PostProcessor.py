@@ -5,6 +5,7 @@ import math
 
 class PostProcessor:
 
+#__________________OPEN AND INIT FILE _____________________________
 	def __init__(self, name, folderLocation):
 		self.name = name
 		#TODO: Make dat file when program handles more complexity
@@ -20,9 +21,9 @@ DECL AXIS HOME
 BAS (#INITMOV, 0)
 
 HOME = {AXIS: A1 0, A2 -90, A3 90, A4 0, A5 0, A6 0}
-PTP HOME'''
+PTP HOME\n'''
 			)
-
+#____________________READ VISUAL COMPONENTS PROGRAM __________________
 	#This method will get all statemnets in the given program, listed in 
 	#the sequence of the simulation. Subprograms not called from the given sequence 
 	#will not be part of the resulting list
@@ -36,6 +37,9 @@ PTP HOME'''
 			finalStatements.extend(self.getProgramStatements(statement.Routine))
 		return finalStatements
 
+#___________________ HANDLE ALL STATEMENT CASES ______________________
+
+	#TODO: Fix speed, acc, ects. 
 	#TODO: Fix reference point extraction, currently only writes arbitrary VC world positions
 	def ptpMotion(self, statement):
 		pM = statement.Positions[0].PositionInWorld
@@ -53,6 +57,12 @@ PTP HOME'''
 		a,b,c = pR.X, pR.Y, pR.Z
 		self.src.write('LIN {X %f,Y %f,Z %f,A %f,B %f,C %f} C_DIS\n' % (x,y,z,a,b,c))
 
+	#TODO: Implement more statements, ie TOOL, BASE, CALL, PATH, DELAY and so on. 
+
+	def delay(self, statement):
+		self.src.write('WAIT SEC %f\n' % statement.Delay )
+
+#__________________ PROCESS ROUTINE __________________________
 	def process(self, routine):
 		statements = self.getProgramStatements(routine)
 
@@ -65,8 +75,12 @@ PTP HOME'''
 				self.linMotion(statement)
 			elif(t == 'PtpMotion'):
 				self.ptpMotion(statement)
+			elif(t == 'Delay'):
+				self.delay(statement)
 			else:
 				print('Statement Not Yet Supported')
 
+#_________________ON FINISH ____________________________________
+	#Close file when finnished
 	def close(self):
 		self.src.close()
