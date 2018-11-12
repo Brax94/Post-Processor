@@ -59,6 +59,19 @@ PTP HOME\n'''
 
 	#TODO: Implement more statements, ie TOOL, BASE, CALL, PATH, DELAY and so on. 
 
+	#TODO: Paths in VC are sets of linear movements - check if SLIN is best fit when
+	#translating. SLP might be just as good or better?
+	def path(self, statement):
+		self.src.write('SPLINE\n')
+		for i in statement.Positions:
+			pM = i.PositionInWorld
+			pV = pM.P
+			pR = pM.WPR 
+			x,y,z =  pV.X, pV.Y, pV.Z
+			a,b,c = pR.X, pR.Y, pR.Z
+			self.src.write('	SLIN {X %f,Y %f,Z %f,A %f,B %f,C %f}\n' % (x,y,z,a,b,c))
+		self.src.write('ENDSPLINE\n')
+
 	def delay(self, statement):
 		self.src.write('WAIT SEC %f\n' % statement.Delay )
 
@@ -77,6 +90,8 @@ PTP HOME\n'''
 				self.ptpMotion(statement)
 			elif(t == 'Delay'):
 				self.delay(statement)
+			elif(t == 'Path'):
+				self.path(statement)
 			else:
 				print('Statement Not Yet Supported')
 
