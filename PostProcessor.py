@@ -5,6 +5,10 @@ import math
 
 class PostProcessor:
 
+	#Make sure robot coincides with the world reference frame
+	#Support for reference frame offsets not yet included
+	#TODO: Support world reference frame offsets. 
+
 #__________________OPEN AND INIT FILE _____________________________
 	def __init__(self, name, folderLocation):
 		self.name = name
@@ -64,9 +68,9 @@ PTP HOME\n'''
 	def path(self, statement):
 		self.src.write('SPLINE\n')
 		for i in statement.Positions:
-			pM = i.PositionInWorld
-			pV = pM.P
-			pR = pM.WPR 
+			pM = i.Position #position matrix
+			pV = pM.P #position vector
+			pR = pM.WPR  #rotation vector
 			x,y,z =  pV.X, pV.Y, pV.Z
 			a,b,c = pR.X, pR.Y, pR.Z
 			self.src.write('	SLIN {X %f,Y %f,Z %f,A %f,B %f,C %f}\n' % (x,y,z,a,b,c))
@@ -96,6 +100,6 @@ PTP HOME\n'''
 				print('Statement Not Yet Supported')
 
 #_________________ON FINISH ____________________________________
-	#Close file when finnished
+	#Close file when finished
 	def close(self):
 		self.src.close()
