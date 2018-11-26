@@ -10,7 +10,7 @@ class PostProcessor:
 	#TODO: Support world reference frame offsets. 
 
 #__________________OPEN AND INIT FILE _____________________________
-	def __init__(self, name, folderLocation):
+	def __init__(self, name, folderLocation, robot=None):
 		self.name = name
 		#TODO: Make dat file when program handles more complexity
 		#self.dat = open(folderLocation + name + ".dat", 'w')
@@ -37,8 +37,10 @@ PTP HOME\n'''
 
 		for statement in statements:
 			finalStatements.append(statement)
-		if statement.Type == 'Call':
-			finalStatements.extend(self.getProgramStatements(statement.Routine))
+			if statement.Type == 'Call':
+				print "extends"
+				print statement.Routine
+				finalStatements.extend(self.getProgramStatements(statement.Routine))
 		return finalStatements
 
 #___________________ HANDLE ALL STATEMENT CASES ______________________
@@ -79,6 +81,22 @@ PTP HOME\n'''
 	def delay(self, statement):
 		self.src.write('WAIT SEC %f\n' % statement.Delay )
 
+	def defineBase(self, statement):
+		pM = statement.Position
+		pV = pM.P #position vector
+		pR = pM.WPR  #rotation vector
+		x,y,z =  pV.X, pV.Y, pV.Z
+		a,b,c = pR.X, pR.Y, pR.Z
+		self.src.write('$BASE = {X %f,Y %f,Z %f,A %f,B %f,C %f}\n' % (x,y,z,a,b,c))
+
+	def defineTool(self, statement):
+		pM = statement.Position
+		pV = pM.P #position vector
+		pR = pM.WPR  #rotation vector
+		x,y,z =  pV.X, pV.Y, pV.Z
+		a,b,c = pR.X, pR.Y, pR.Z
+		self.src.write('$TOOL = {X %f,Y %f,Z %f,A %f,B %f,C %f}\n' % (x,y,z,a,b,c))
+
 #__________________ PROCESS ROUTINE __________________________
 	def process(self, routine):
 		statements = self.getProgramStatements(routine)
@@ -87,7 +105,7 @@ PTP HOME\n'''
 		#types. Support for all statement types should be added here.
 
 		for statement in statements:
-			t = statement.Type 
+			t = statement.Type
 			if(t == 'LinMotion' ):
 				self.linMotion(statement)
 			elif(t == 'PtpMotion'):
@@ -96,6 +114,10 @@ PTP HOME\n'''
 				self.delay(statement)
 			elif(t == 'Path'):
 				self.path(statement)
+			elif(t == 'DefineTool'):
+				self.defineTool(statement)
+			elif(t == 'DefineBase'):
+				self.defineBase(statement)
 			else:
 				print('Statement Not Yet Supported')
 
@@ -103,3 +125,4 @@ PTP HOME\n'''
 	#Close file when finished
 	def close(self):
 		self.src.close()
+
