@@ -81,6 +81,7 @@ PTP HOME\n'''
 	def delay(self, statement):
 		self.src.write('WAIT SEC %f\n' % statement.Delay )
 
+	#Sets general base to new place - only one base supported, more could be in the future
 	def defineBase(self, statement):
 		pM = statement.Position
 		pV = pM.P #position vector
@@ -89,6 +90,7 @@ PTP HOME\n'''
 		a,b,c = pR.X, pR.Y, pR.Z
 		self.src.write('$BASE = {X %f,Y %f,Z %f,A %f,B %f,C %f}\n' % (x,y,z,a,b,c))
 
+	#TOOL defined relative to mountplate/outer flange of robot - better support could be added later
 	def defineTool(self, statement):
 		pM = statement.Position
 		pV = pM.P #position vector
